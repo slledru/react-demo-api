@@ -6,6 +6,7 @@ const logger = require('morgan')
 
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
+const loginRouter = require('./routes/login')
 
 const app = express()
 
@@ -19,8 +20,23 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+// CORS options in header
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PATCH, DELETE, PUT')
+  res.header('Referrer-Policy', 'no-referrer')
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  else {
+    next()
+  }
+})
+
 app.use('/', indexRouter)
 app.use('/users', usersRouter)
+app.use('/login', loginRouter)
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -35,7 +51,7 @@ app.use((err, req, res, next) => {
 
   // render the error page
   res.status(err.status || 500)
-  res.render('error')
+  res.json(err)
 })
 
 module.exports = app
